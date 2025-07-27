@@ -32,16 +32,20 @@ pub struct HyprctlError {
 impl Error for HyprctlError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match &self.variant {
-            ErrorVariant::ListActive(er) => Some(er),
+            ErrorVariant::ListActive(err) => Some(err),
         }
     }
 }
 
 impl fmt::Display for HyprctlError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.variant {
-            ErrorVariant::ListActive(_) => {
-                write!(f, "run hyprctl hyprpaper listactive error received")
+        match &self.variant {
+            ErrorVariant::ListActive(err) => {
+                write!(
+                    f,
+                    "run hyprctl hyprpaper listactive error received.\nDescription: {}",
+                    err.description
+                )
             }
         }
     }
