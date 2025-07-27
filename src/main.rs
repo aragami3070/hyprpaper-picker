@@ -1,6 +1,6 @@
 mod hyprctl;
 
-
 fn main() {
+
 
 }
