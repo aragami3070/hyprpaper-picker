@@ -1,7 +1,7 @@
 use std::{error::Error, fmt, process::Command};
 
 pub struct Wallpaper {
-    path: String,
+    pub path: String,
 }
 
 pub struct ActiveWallpaper(pub Wallpaper);
@@ -47,3 +47,22 @@ impl fmt::Display for HyprctlError {
     }
 }
 
+pub fn get_active_wallpaper() -> Result<ActiveWallpaper, Box<dyn Error>> {
+    let list_active = Command::new("hyprctl")
+        .args(&["hyprpaper", "listactive"])
+        .output()?;
+
+    if !list_active.status.success() {
+        return Err(Box::new(HyprctlError {
+            variant: ErrorVariant::ListActive(HyprpaperError {
+                description: String::from_utf8(list_active.stderr)?,
+            }),
+        }));
+    }
+
+    let active_wallpaper = String::from_utf8(list_active.stdout)?;
+
+    Ok(ActiveWallpaper(Wallpaper {
+        path: active_wallpaper,
+    }))
+}
