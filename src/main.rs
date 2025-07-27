@@ -1,3 +1,6 @@
+mod hyprctl;
+
+
 fn main() {
-    println!("Hello, world!");
+
 }
