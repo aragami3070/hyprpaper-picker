@@ -3,6 +3,20 @@ use std::{error::Error, fmt, process::Command, str::FromStr};
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Path(pub String);
 
+impl FromStr for Path {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.is_empty() {
+            Err("Repo owner cannot be empty".to_string())
+        } else if s.contains('/') {
+            Err("Repo owner cannot contain '/'".to_string())
+        } else {
+            Ok(Path(s.to_string()))
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Monitor(pub String);
 
