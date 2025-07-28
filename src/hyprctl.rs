@@ -8,9 +8,9 @@ impl FromStr for Path {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s.is_empty() {
-            Err("Repo owner cannot be empty".to_string())
-        } else if s.contains('/') {
-            Err("Repo owner cannot contain '/'".to_string())
+            Err("Path cannot be empty".to_string())
+        } else if !s.contains('/') {
+            Err("Path must have '/'".to_string())
         } else {
             Ok(Path(s.to_string()))
         }
