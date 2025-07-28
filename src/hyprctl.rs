@@ -122,4 +122,22 @@ mod tests {
             .unwrap();
         assert_eq!(err, expected);
     }
+
+    #[rstest]
+    #[case("DP-2 = /home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper7.png",
+		ActiveWallpaper(
+			Wallpaper {
+				path: "/home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper7.png".to_string(),
+				monitor: "DP-2".to_string()
+			}))]
+    #[case("DP-2 = /home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper7.png
+ = /home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper8.png ", ActiveWallpaper(
+			Wallpaper {
+				path: "/home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper7.png".to_string(),
+				monitor: "DP-2".to_string()
+			}))]
+    fn valid_wallpaper_path_in_string(#[case] text: &str, #[case] expected: ActiveWallpaper) {
+        let result = is_wallpaper_path_in_string(text.to_string()).unwrap();
+        assert_eq!(result, expected);
+    }
 }
