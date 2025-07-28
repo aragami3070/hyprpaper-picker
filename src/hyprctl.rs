@@ -36,6 +36,32 @@ impl fmt::Display for HyprctlError {
     }
 }
 
+/// Get first path and monitor name from string
+///
+/// If '=' not one in text then remove paths after first path
+fn string_to_path_and_monitor(text: String) -> Result<(String, String), Box<dyn Error>> {
+    let mut eq_pos = match text.find('=') {
+        Some(pos) => pos,
+        None => {
+            return Err(Box::new(HyprctlError {
+                kind: HyprctlErrorKind::ListActive,
+                description: text,
+            }));
+        }
+    };
+
+    let monitor = text[..eq_pos - 1].to_string();
+    let mut path = text[eq_pos + 2..].to_string();
+    eq_pos = match path.find('=') {
+        Some(pos) => pos,
+        None => return Ok((path, monitor)),
+    };
+
+    path = path[..eq_pos - 2].to_string();
+    return Ok((path, monitor));
+}
+
+/// Checks the path is contained in the string
 fn is_wallpaper_path_in_string(text: String) -> Result<ActiveWallpaper, Box<dyn Error>> {
     if !(text.contains(".png")
         || text.contains(".jpg")
@@ -48,9 +74,11 @@ fn is_wallpaper_path_in_string(text: String) -> Result<ActiveWallpaper, Box<dyn 
         }));
     }
 
+    let (path, monitor) = string_to_path_and_monitor(text)?;
+
     Ok(ActiveWallpaper(Wallpaper {
-        path: text.clone(),
-        monitor: text,
+        path: path,
+        monitor: monitor,
     }))
 }
 
