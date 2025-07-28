@@ -1,6 +1,8 @@
+use std::{error::Error, fs, io};
+
 use clap::{Parser, Subcommand};
 
-use crate::hyprctl::Path;
+use crate::hyprctl::{Monitor, Path, Wallpaper};
 
 #[derive(Parser)]
 #[command(version, about)]
@@ -12,8 +14,40 @@ pub struct Args {
 #[derive(Subcommand)]
 pub enum CliCommand {
     /// Get next wallpaper
-    Next { dir_path: Path },
+    Next {
+        #[clap(long, short)]
+		dir_path: Path
+	},
 
     /// Get random wallpaper wallpaper
-    Rand { dir_path: Path },
+    Rand { 
+        #[clap(long, short)]
+		dir_path: Path
+	},
+}
+
+pub fn get_all_wallpapers(dir_path: Path) -> Result<Vec<Wallpaper>, Box<dyn Error>> {
+    let paths = fs::read_dir(format!("{}", dir_path.0))?;
+
+    let mut wallpapers = Vec::new();
+
+    for wallp_path in paths {
+        let path_pars = match wallp_path?.path().to_str() {
+            Some(path) => path.to_string(),
+            None => {
+                return Err(Box::new(io::Error::new(
+                    io::ErrorKind::InvalidData,
+                    "can't parse path to wallpaper",
+                )));
+            }
+        };
+
+        let wallpaper = Wallpaper {
+            path: Path(path_pars),
+            monitor: Monitor(String::new()),
+        };
+        wallpapers.push(wallpaper);
+    }
+
+    Ok(wallpapers)
 }
