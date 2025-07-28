@@ -1,17 +1,20 @@
 use std::{error::Error, fmt, process::Command};
 
+#[derive(Debug, PartialEq, Eq)]
 pub struct Wallpaper {
     pub path: String,
+    pub monitor: String,
 }
 
+#[derive(Debug, PartialEq, Eq)]
 pub struct ActiveWallpaper(pub Wallpaper);
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 enum HyprctlErrorKind {
     ListActive,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct HyprctlError {
     kind: HyprctlErrorKind,
     description: String,
@@ -33,6 +36,24 @@ impl fmt::Display for HyprctlError {
     }
 }
 
+fn is_wallpaper_path_in_string(text: String) -> Result<ActiveWallpaper, Box<dyn Error>> {
+    if !(text.contains(".png")
+        || text.contains(".jpg")
+        || text.contains(".jpeg")
+        || text.contains(".jxl"))
+    {
+        return Err(Box::new(HyprctlError {
+            kind: HyprctlErrorKind::ListActive,
+            description: text,
+        }));
+    }
+
+    Ok(ActiveWallpaper(Wallpaper {
+        path: text.clone(),
+        monitor: text,
+    }))
+}
+
 pub fn get_active_wallpaper() -> Result<ActiveWallpaper, Box<dyn Error>> {
     let list_active = Command::new("hyprctl")
         .args(["hyprpaper", "listactive"])
@@ -45,9 +66,7 @@ pub fn get_active_wallpaper() -> Result<ActiveWallpaper, Box<dyn Error>> {
         }));
     }
 
-    let active_wallpaper = String::from_utf8(list_active.stdout)?;
+    let active_wallpaper = is_wallpaper_path_in_string(String::from_utf8(list_active.stdout)?)?;
 
-    Ok(ActiveWallpaper(Wallpaper {
-        path: active_wallpaper,
-    }))
+    Ok(active_wallpaper)
 }
