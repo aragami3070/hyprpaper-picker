@@ -5,7 +5,7 @@ mod hyprctl;
 use clap::Parser;
 use std::process;
 
-use crate::dir_scan::{Args, CliCommand, get_all_wallpapers};
+use crate::{choose::random_wallpaper, dir_scan::{get_all_wallpapers, Args, CliCommand}};
 
 fn main() {
     let args: Args = Args::parse();
@@ -17,7 +17,7 @@ fn main() {
         }
     };
 
-    println!("Result: {active_wallpaper:?}");
+    println!("Active wallpaper: {active_wallpaper:?}");
 
     match args.command {
         CliCommand::Rand { dir_path } => {
@@ -29,9 +29,9 @@ fn main() {
                 }
             };
 
-            for wallpaper in wallpapers {
-                println!("{wallpaper:?}")
-            }
+			let new_wallpaper = random_wallpaper(wallpapers, active_wallpaper);
+
+			println!("Result: {new_wallpaper:?}");
         }
 
         CliCommand::Next { dir_path } => {

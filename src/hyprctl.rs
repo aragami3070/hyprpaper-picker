@@ -20,7 +20,7 @@ impl FromStr for Path {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Monitor(pub String);
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Wallpaper {
     pub path: Path,
     pub monitor: Monitor,
@@ -28,6 +28,9 @@ pub struct Wallpaper {
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct ActiveWallpaper(pub Wallpaper);
+
+#[derive(Debug, PartialEq, Eq)]
+pub struct NewWallpaper(pub Wallpaper);
 
 #[derive(Debug, PartialEq, Eq)]
 enum HyprctlErrorKind {
