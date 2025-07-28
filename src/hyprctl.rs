@@ -98,3 +98,28 @@ pub fn get_active_wallpaper() -> Result<ActiveWallpaper, Box<dyn Error>> {
 
     Ok(active_wallpaper)
 }
+
+#[cfg(test)]
+mod tests {
+    use rstest::rstest;
+
+    use super::*;
+
+    #[rstest]
+    #[case("invalid command", HyprctlError {
+            kind: HyprctlErrorKind::ListActive,
+            description: "invalid command".to_string(),
+        })]
+    #[case("some other error", HyprctlError {
+            kind: HyprctlErrorKind::ListActive,
+            description: "some other error".to_string(),
+        })]
+    fn invalid_wallpaper_path_in_string(#[case] text: &str, #[case] expected: HyprctlError) {
+        let err = *is_wallpaper_path_in_string(text.to_string())
+            .err()
+            .unwrap()
+            .downcast::<HyprctlError>()
+            .unwrap();
+        assert_eq!(err, expected);
+    }
+}
