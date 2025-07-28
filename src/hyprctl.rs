@@ -1,9 +1,15 @@
-use std::{error::Error, fmt, process::Command};
+use std::{error::Error, fmt, process::Command, str::FromStr};
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Path(pub String);
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Monitor(pub String);
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Wallpaper {
-    pub path: String,
-    pub monitor: String,
+    pub path: Path,
+    pub monitor: Monitor,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -39,7 +45,7 @@ impl fmt::Display for HyprctlError {
 /// Get first path and monitor name from string
 ///
 /// If '=' not one in text then remove paths after first path
-fn string_to_path_and_monitor(text: String) -> Result<(String, String), Box<dyn Error>> {
+fn string_to_path_and_monitor(text: String) -> Result<(Path, Monitor), Box<dyn Error>> {
     let mut eq_pos = match text.find('=') {
         Some(pos) => pos,
         None => {
@@ -50,15 +56,15 @@ fn string_to_path_and_monitor(text: String) -> Result<(String, String), Box<dyn 
         }
     };
 
-    let monitor = text[..eq_pos - 1].to_string();
-    let mut path = text[eq_pos + 2..].to_string();
+    let monitor = Monitor(text[..eq_pos - 1].to_string());
+    let path = text[eq_pos + 2..].to_string();
     eq_pos = match path.find('=') {
         Some(pos) => pos,
-        None => return Ok((path, monitor)),
+        None => return Ok((Path(path), monitor)),
     };
 
-    path = path[..eq_pos - 2].to_string();
-    return Ok((path, monitor));
+    let first_path = Path(path[..eq_pos - 2].to_string());
+    Ok((first_path, monitor))
 }
 
 /// Checks the path is contained in the string
@@ -127,14 +133,14 @@ mod tests {
     #[case("DP-2 = /home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper7.png",
 		ActiveWallpaper(
 			Wallpaper {
-				path: "/home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper7.png".to_string(),
-				monitor: "DP-2".to_string()
+				path: Path("/home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper7.png".to_string()),
+				monitor: Monitor("DP-2".to_string())
 			}))]
     #[case("DP-2 = /home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper7.png
  = /home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper8.png ", ActiveWallpaper(
 			Wallpaper {
-				path: "/home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper7.png".to_string(),
-				monitor: "DP-2".to_string()
+				path: Path("/home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper7.png".to_string()),
+				monitor: Monitor("DP-2".to_string())
 			}))]
     fn valid_wallpaper_path_in_string(#[case] text: &str, #[case] expected: ActiveWallpaper) {
         let result = is_wallpaper_path_in_string(text.to_string()).unwrap();
