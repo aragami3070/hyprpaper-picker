@@ -16,18 +16,18 @@ pub enum CliCommand {
     /// Get next wallpaper
     Next {
         #[clap(long, short)]
-		dir_path: Path
-	},
+        dir_path: Path,
+    },
 
     /// Get random wallpaper wallpaper
-    Rand { 
+    Rand {
         #[clap(long, short)]
-		dir_path: Path
-	},
+        dir_path: Path,
+    },
 }
 
 pub fn get_all_wallpapers(dir_path: Path) -> Result<Vec<Wallpaper>, Box<dyn Error>> {
-    let paths = fs::read_dir(format!("{}", dir_path.0))?;
+    let paths = fs::read_dir(dir_path.0)?;
 
     let mut wallpapers = Vec::new();
 
