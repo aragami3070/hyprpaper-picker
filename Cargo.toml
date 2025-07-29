@@ -1,5 +1,7 @@
 [package]
 name = "hyprpaper-picker"
+authors = ["aragami3070 <smirnov17612@gmail.com>"]
+repository = "https://github.com/aragami3070/hyprpaper-picker"
 version = "0.1.0"
 edition = "2024"
 
