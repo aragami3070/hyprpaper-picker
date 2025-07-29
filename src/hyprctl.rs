@@ -49,7 +49,7 @@ enum HyprctlErrorKind {
     ListActive,
     /// When try set wallpaper
     WallpaperSet,
-	/// When try preload wallpaper
+    /// When try preload wallpaper
     WallpaperPreload,
 }
 
@@ -148,8 +148,33 @@ pub fn get_active_wallpaper() -> Result<ActiveWallpaper, Box<dyn Error>> {
     Ok(active_wallpaper)
 }
 
+/// Preload new wallpaper using ```hyprctl hyprpaper preload```
+fn preload_new_wallpaper(new_wallpaper: &NewWallpaper) -> Result<(), Box<dyn Error>> {
+    let wallpaper_preload = Command::new("hyprctl")
+        .args(["hyprpaper", "preload", new_wallpaper.0.path.0.as_str()])
+        .output()?;
+
+    if !wallpaper_preload.status.success() {
+        return Err(Box::new(HyprctlError {
+            kind: HyprctlErrorKind::WallpaperPreload,
+            description: String::from_utf8(wallpaper_preload.stdout)?,
+        }));
+    }
+
+    if !String::from_utf8(wallpaper_preload.stdout.clone())?.contains("ok") {
+        return Err(Box::new(HyprctlError {
+            kind: HyprctlErrorKind::WallpaperPreload,
+            description: String::from_utf8(wallpaper_preload.stdout)?,
+        }));
+    }
+
+    Ok(())
+}
+
 /// Set new wallpaper using ```hyprctl hyprpaper wallpaper```
 pub fn set_new_wallpaper(new_wallpaper: NewWallpaper) -> Result<(), Box<dyn Error>> {
+    preload_new_wallpaper(&new_wallpaper)?;
+
     let settings = format!("{},{}", new_wallpaper.0.monitor.0, new_wallpaper.0.path.0);
 
     let wallpaper_set = Command::new("hyprctl")
