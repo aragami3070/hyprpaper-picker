@@ -126,7 +126,7 @@ pub fn get_active_wallpaper() -> Result<ActiveWallpaper, Box<dyn Error>> {
     if !list_active.status.success() {
         return Err(Box::new(HyprctlError {
             kind: HyprctlErrorKind::ListActive,
-            description: String::from_utf8(list_active.stderr)?,
+            description: String::from_utf8(list_active.stdout)?,
         }));
     }
 
@@ -145,7 +145,7 @@ pub fn set_new_wallpaper(new_wallpaper: NewWallpaper) -> Result<(), Box<dyn Erro
     if !wallpaper_set.status.success() {
         return Err(Box::new(HyprctlError {
             kind: HyprctlErrorKind::WallpaperSet,
-            description: String::from_utf8(wallpaper_set.stderr)?,
+            description: String::from_utf8(wallpaper_set.stdout)?,
         }));
     }
 
