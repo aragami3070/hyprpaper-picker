@@ -1,17 +1,18 @@
 # Hyprpaper picker
 
 Blazing fast wallpaper changer for Hyprland.
+
 <details>
+	<summary>Table of Contents</summary>
+
+* [Requirements](#Requirements)
+* [Installation (only manual for now)](#Installation-(only-manual-for-now))
+* [Usage](#Usage)
+* [Arguments](#Arguments)
+* [Flags](#Flags)
+* [Contributing](#Contributing)
+* [License](#License)
 </details>
-
-
-* [Requirements](Requirements)
-* [Installation (only manual for now)](Installation-(only-manual-for-now))
-* [Usage](Usage)
-* [Arguments](Arguments)
-* [Flags](Flags)
-* [Contributing](Contributing)
-* [License](License)
 
 
 ## Requirements
