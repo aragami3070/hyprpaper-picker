@@ -49,6 +49,8 @@ enum HyprctlErrorKind {
     ListActive,
     /// When try set wallpaper
     WallpaperSet,
+	/// When try preload wallpaper
+    WallpaperPreload,
 }
 
 impl Error for HyprctlError {}
@@ -68,6 +70,13 @@ impl fmt::Display for HyprctlError {
                 write!(
                     f,
                     "run hyprctl hyprpaper wallpaper error received.\nDescription: {}",
+                    &self.description
+                )
+            }
+            HyprctlErrorKind::WallpaperPreload => {
+                write!(
+                    f,
+                    "run hyprctl hyprpaper preload error received.\nDescription: {}",
                     &self.description
                 )
             }
