@@ -6,7 +6,7 @@ Blazing fast wallpaper changer for Hyprland.
 	<summary>Table of Contents</summary>
 
 * [Requirements](#Requirements)
-* [Installation (only manual for now)](#Installation-(only-manual-for-now))
+* [Installation (only manual for now)](#Installation)
 * [Usage](#Usage)
 * [Arguments](#Arguments)
 * [Flags](#Flags)
@@ -21,7 +21,7 @@ Blazing fast wallpaper changer for Hyprland.
 - [Hyprland](https://github.com/hyprwm/Hyprland)
 - [Hyprpaper](https://github.com/hyprwm/Hyprpaper)
 
-## Installation (only manual for now)
+## Installation
 
 * Clone the repository
 	```bash
@@ -64,4 +64,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-[MIT](License)
+[License](License)
