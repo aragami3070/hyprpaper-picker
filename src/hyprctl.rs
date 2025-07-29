@@ -42,9 +42,9 @@ pub struct HyprctlError {
 /// Type of HyprctlError
 #[derive(Debug, PartialEq, Eq)]
 enum HyprctlErrorKind {
-	/// When try get last active wallpaper
+    /// When try get last active wallpaper
     ListActive,
-	/// When try set wallpaper
+    /// When try set wallpaper
     WallpaperSet,
 }
 
@@ -133,6 +133,31 @@ pub fn get_active_wallpaper() -> Result<ActiveWallpaper, Box<dyn Error>> {
     let active_wallpaper = is_wallpaper_path_in_string(String::from_utf8(list_active.stdout)?)?;
 
     Ok(active_wallpaper)
+}
+
+pub fn set_new_wallpaper(new_wallpaper: NewWallpaper) -> Result<(), Box<dyn Error>> {
+    let settings = format!("{},{}", new_wallpaper.0.monitor.0, new_wallpaper.0.path.0);
+
+    let wallpaper_set = Command::new("hyprctl")
+        .args(["hyprpaper", "wallpaper", settings.as_str()])
+        .output()?;
+
+    if !wallpaper_set.status.success() {
+        return Err(Box::new(HyprctlError {
+            kind: HyprctlErrorKind::WallpaperSet,
+            description: String::from_utf8(wallpaper_set.stderr)?,
+        }));
+    }
+
+    if !String::from_utf8(wallpaper_set.stdout.clone())?.contains("ok")
+    {
+        return Err(Box::new(HyprctlError {
+            kind: HyprctlErrorKind::WallpaperSet,
+            description: String::from_utf8(wallpaper_set.stdout)?,
+        }));
+	}
+
+    Ok(())
 }
 
 #[cfg(test)]
