@@ -32,15 +32,20 @@ pub struct ActiveWallpaper(pub Wallpaper);
 #[derive(Debug, PartialEq, Eq)]
 pub struct NewWallpaper(pub Wallpaper);
 
-#[derive(Debug, PartialEq, Eq)]
-enum HyprctlErrorKind {
-    ListActive,
-}
-
+/// Errors returned by the hyprctl
 #[derive(Debug, PartialEq, Eq)]
 pub struct HyprctlError {
     kind: HyprctlErrorKind,
     description: String,
+}
+
+/// Type of HyprctlError
+#[derive(Debug, PartialEq, Eq)]
+enum HyprctlErrorKind {
+	/// When try get last active wallpaper
+    ListActive,
+	/// When try set wallpaper
+    WallpaperSet,
 }
 
 impl Error for HyprctlError {}
@@ -52,6 +57,14 @@ impl fmt::Display for HyprctlError {
                 write!(
                     f,
                     "run hyprctl hyprpaper listactive error received.\nDescription: {}",
+                    &self.description
+                )
+            }
+
+            HyprctlErrorKind::WallpaperSet => {
+                write!(
+                    f,
+                    "run hyprctl hyprpaper wallpaper error received.\nDescription: {}",
                     &self.description
                 )
             }
