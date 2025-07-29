@@ -1,5 +1,6 @@
 use std::{error::Error, fmt, process::Command, str::FromStr};
 
+/// Path to dir or file
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Path(pub String);
 
@@ -17,9 +18,11 @@ impl FromStr for Path {
     }
 }
 
+/// Monitor port (for example DP-2 or edP-1)
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Monitor(pub String);
 
+/// Wallpaper info
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Wallpaper {
     pub path: Path,
@@ -118,6 +121,7 @@ fn is_wallpaper_path_in_string(text: String) -> Result<ActiveWallpaper, Box<dyn 
     }))
 }
 
+/// Get active wallpaper using ```hyprctl hyprpaper listactive```
 pub fn get_active_wallpaper() -> Result<ActiveWallpaper, Box<dyn Error>> {
     let list_active = Command::new("hyprctl")
         .args(["hyprpaper", "listactive"])
@@ -135,6 +139,7 @@ pub fn get_active_wallpaper() -> Result<ActiveWallpaper, Box<dyn Error>> {
     Ok(active_wallpaper)
 }
 
+/// Set new wallpaper using ```hyprctl hyprpaper wallpaper```
 pub fn set_new_wallpaper(new_wallpaper: NewWallpaper) -> Result<(), Box<dyn Error>> {
     let settings = format!("{},{}", new_wallpaper.0.monitor.0, new_wallpaper.0.path.0);
 
@@ -149,13 +154,12 @@ pub fn set_new_wallpaper(new_wallpaper: NewWallpaper) -> Result<(), Box<dyn Erro
         }));
     }
 
-    if !String::from_utf8(wallpaper_set.stdout.clone())?.contains("ok")
-    {
+    if !String::from_utf8(wallpaper_set.stdout.clone())?.contains("ok") {
         return Err(Box::new(HyprctlError {
             kind: HyprctlErrorKind::WallpaperSet,
             description: String::from_utf8(wallpaper_set.stdout)?,
         }));
-	}
+    }
 
     Ok(())
 }
