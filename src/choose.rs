@@ -7,7 +7,7 @@ pub fn random_wallpaper(
     mut wallpapers: Vec<Wallpaper>,
     active_wallpaper: ActiveWallpaper,
 ) -> Result<NewWallpaper, Box<dyn Error>> {
-    wallpapers.retain(|x| (*x).path != active_wallpaper.0.path);
+    wallpapers.retain(|x| x.path != active_wallpaper.0.path);
 
     let rand_num = rand::random_range(0..wallpapers.len() - 1);
 
@@ -26,7 +26,7 @@ pub fn next_wallpaper(
 ) -> Result<NewWallpaper, Box<dyn Error>> {
     let active_wallp_index = wallpapers
         .iter()
-        .position(|w| (*w).path == active_wallpaper.0.path);
+        .position(|w| w.path == active_wallpaper.0.path);
 
     let new_wallpaper = match active_wallp_index {
         Some(i) => {
