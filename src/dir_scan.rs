@@ -26,6 +26,7 @@ pub enum CliCommand {
     },
 }
 
+/// Get all path to files from dir path
 pub fn get_all_wallpapers(dir_path: Path) -> Result<Vec<Wallpaper>, Box<dyn Error>> {
     let paths = fs::read_dir(dir_path.0)?;
 

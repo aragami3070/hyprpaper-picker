@@ -124,10 +124,7 @@ fn is_wallpaper_path_in_string(text: String) -> Result<ActiveWallpaper, Box<dyn 
 
     let (path, monitor) = string_to_path_and_monitor(text)?;
 
-    Ok(ActiveWallpaper(Wallpaper {
-        path: path,
-        monitor: monitor,
-    }))
+    Ok(ActiveWallpaper(Wallpaper { path, monitor }))
 }
 
 /// Get active wallpaper using ```hyprctl hyprpaper listactive```

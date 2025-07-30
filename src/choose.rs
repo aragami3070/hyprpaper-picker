@@ -2,6 +2,7 @@ use std::error::Error;
 
 use crate::hyprctl::{ActiveWallpaper, NewWallpaper, Wallpaper};
 
+/// Get random NewWallpaper from Wallpaper vec
 pub fn random_wallpaper(
     mut wallpapers: Vec<Wallpaper>,
     active_wallpaper: ActiveWallpaper,
@@ -18,6 +19,7 @@ pub fn random_wallpaper(
     Ok(new_wallpaper)
 }
 
+/// Get next NewWallpaper from Wallpaper vec
 pub fn next_wallpaper(
     wallpapers: Vec<Wallpaper>,
     active_wallpaper: ActiveWallpaper,
