@@ -19,7 +19,13 @@ pub enum CliCommand {
         dir_path: Path,
     },
 
-    /// Get random wallpaper wallpaper
+    /// Get prev wallpaper
+    Prev {
+        #[clap(long, short)]
+        dir_path: Path,
+    },
+
+    /// Get random wallpaper
     Rand {
         #[clap(long, short)]
         dir_path: Path,
