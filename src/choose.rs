@@ -113,4 +113,40 @@ mod tests {
             NewWallpaper(except_wallpaper)
         );
     }
+
+    #[rstest]
+    #[case(
+        "/home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper5.png",
+        "/home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper4.png"
+    )]
+    #[case(
+        "/home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper5.png",
+        "/home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper7.png"
+    )]
+    fn valid_prev_wallpaper_choose(#[case] active_wallp: &str, #[case] except: &str) {
+        let active_wallpaper = Wallpaper {
+            path: Path(active_wallp.to_owned()),
+            monitor: Monitor("eDP-1".to_owned()),
+        };
+
+        let except_wallpaper = Wallpaper {
+            path: Path(except.to_owned()),
+            monitor: Monitor("eDP-1".to_owned()),
+        };
+
+        let mut wallpapers: Vec<Wallpaper> = Vec::new();
+        wallpapers.push(active_wallpaper.clone());
+        wallpapers.push(except_wallpaper.clone());
+        wallpapers.push(Wallpaper {
+            path: Path("/home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper6.png".to_owned()),
+            monitor: Monitor("".to_owned()),
+        });
+
+        wallpapers.sort_by_key(|a| a.path.0.clone());
+
+        assert_eq!(
+            prev_wallpaper(wallpapers, ActiveWallpaper(active_wallpaper)).unwrap(),
+            NewWallpaper(except_wallpaper)
+        );
+    }
 }
