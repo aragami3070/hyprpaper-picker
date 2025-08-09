@@ -18,7 +18,7 @@ impl FromStr for Path {
     }
 }
 
-/// Monitor port (for example DP-2 or edP-1)
+/// Monitor port (for example DP-2 or eDP-1)
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Monitor(pub String);
 
