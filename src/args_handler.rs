@@ -2,8 +2,8 @@ use std::error::Error;
 
 use crate::{
     choose::{next_wallpaper, prev_wallpaper, random_wallpaper},
-    dir_scan::{get_all_wallpapers, Args, CliCommand},
-    hyprctl::{set_new_wallpaper, ActiveWallpaper},
+    dir_scan::{Args, CliCommand, get_all_wallpapers},
+    hyprctl::{ActiveWallpaper, set_new_wallpaper},
 };
 
 pub fn handler(args: Args, active_wallpaper: ActiveWallpaper) -> Result<(), Box<dyn Error>> {

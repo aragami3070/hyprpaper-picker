@@ -51,7 +51,7 @@ pub fn prev_wallpaper(
 ) -> Result<NewWallpaper, Box<dyn Error>> {
     let active_wallp_index = wallpapers
         .iter()
-        .position(|w| (*w).path == active_wallpaper.0.path);
+        .position(|w| w.path == active_wallpaper.0.path);
 
     let new_wallpaper = match active_wallp_index {
         Some(i) => {
