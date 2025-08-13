@@ -54,6 +54,7 @@ bind = $mainMod SHIFT, W, exec, hyprpaper-picker rand -d $wallpaperDir
 ### Arguments
 - `rand` - choose random wallpaper from dir
 - `next` - choose next wallpaper from dir
+- `prev` - choose prev wallpaper from dir
 
 ### Flags
 - `-d` - path to the directory with wallpapers
