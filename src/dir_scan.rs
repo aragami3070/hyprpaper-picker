@@ -1,36 +1,6 @@
 use std::{error::Error, fs, io};
 
-use clap::{Parser, Subcommand};
-
 use crate::hyprctl::{Monitor, Path, Wallpaper};
-
-#[derive(Parser)]
-#[command(version, about)]
-pub struct Args {
-    #[clap(subcommand)]
-    pub command: CliCommand,
-}
-
-#[derive(Subcommand)]
-pub enum CliCommand {
-    /// Get next wallpaper
-    Next {
-        #[clap(long, short)]
-        dir_path: Path,
-    },
-
-    /// Get prev wallpaper
-    Prev {
-        #[clap(long, short)]
-        dir_path: Path,
-    },
-
-    /// Get random wallpaper
-    Rand {
-        #[clap(long, short)]
-        dir_path: Path,
-    },
-}
 
 /// Get all path to files from dir path
 pub fn get_all_wallpapers(dir_path: Path) -> Result<Vec<Wallpaper>, Box<dyn Error>> {
