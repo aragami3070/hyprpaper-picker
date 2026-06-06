@@ -13,9 +13,7 @@ use crate::{args::Args, args_handler::handler};
 
 fn main() {
     let args: Args = Args::parse();
-    if let Err(err) =
-        hyprctl::get_active_wallpaper().and_then(|active_wallpaper| handler(args, active_wallpaper))
-    {
+    if let Err(err) = handler(args) {
         eprintln!("Error: {err}");
         process::exit(1)
     };

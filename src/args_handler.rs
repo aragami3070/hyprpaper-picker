@@ -3,20 +3,20 @@ use crate::{
     choose::{next_wallpaper, prev_wallpaper, random_wallpaper},
     dir_scan::get_all_wallpapers,
     errors::HyprpaperPickerError,
-    hyprctl::{ActiveWallpaper, set_new_wallpaper},
 };
 
-pub fn handler(args: Args, active_wallpaper: ActiveWallpaper) -> Result<(), HyprpaperPickerError> {
+pub fn handler(args: Args) -> Result<(), HyprpaperPickerError> {
     match args.command {
+        CliCommand::Setup {
+            wallpaper_path,
+            monitor,
+        } => {
+            todo!()
+        }
         CliCommand::Rand { dir_path } => {
             let wallpapers = get_all_wallpapers(dir_path)?;
 
-            let new_wallpaper = random_wallpaper(wallpapers, active_wallpaper);
-
-            match set_new_wallpaper(new_wallpaper) {
-                Ok(_) => Ok(()),
-                Err(err) => Err(err),
-            }
+            todo!();
         }
 
         CliCommand::Next { dir_path } => {
@@ -24,25 +24,14 @@ pub fn handler(args: Args, active_wallpaper: ActiveWallpaper) -> Result<(), Hypr
 
             wallpapers.sort_by_key(|a| a.path.0.clone());
 
-            let new_wallpaper = next_wallpaper(wallpapers, active_wallpaper);
-
-            match set_new_wallpaper(new_wallpaper) {
-                Ok(_) => Ok(()),
-                Err(err) => Err(err),
-            }
+            todo!();
         }
 
         CliCommand::Prev { dir_path } => {
             let mut wallpapers = get_all_wallpapers(dir_path)?;
 
             wallpapers.sort_by_key(|a| a.path.0.clone());
-
-            let new_wallpaper = prev_wallpaper(wallpapers, active_wallpaper);
-
-            match set_new_wallpaper(new_wallpaper) {
-                Ok(_) => Ok(()),
-                Err(err) => Err(err),
-            }
+            todo!()
         }
     }
 }

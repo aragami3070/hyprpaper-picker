@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand};
 
-use crate::hyprctl::Path;
+use crate::hyprctl::{Monitor, Path};
 
 #[derive(Parser)]
 #[command(version, about)]
@@ -11,6 +11,13 @@ pub struct Args {
 
 #[derive(Subcommand)]
 pub enum CliCommand {
+    /// Setup monitor and wallpaper
+    Setup {
+        #[clap(long, short)]
+        wallpaper_path: Path,
+        #[clap(long, short)]
+        monitor: Monitor,
+    },
     /// Get next wallpaper
     Next {
         #[clap(long, short)]
