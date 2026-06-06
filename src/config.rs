@@ -15,3 +15,23 @@ fn create_if_not_exists() -> Result<PathBuf, HyprpaperPickerError> {
     fs::create_dir_all(&config_dir)?;
     Ok(config_buf)
 }
+
+/// Get cur wallpaper from config file
+pub fn get_cur_wallpaper(monitor: Option<Monitor>) -> Result<Wallpaper, HyprpaperPickerError> {
+    let config_buf = create_if_not_exists()?;
+
+    let mut cur_wallpaper: Wallpaper = if config_buf.exists() {
+        let wallpaper_info = fs::read_to_string(&config_buf)?;
+        toml::from_str(&wallpaper_info)?
+    } else {
+        return Err(HyprpaperPickerError::Config(String::from(
+            "wallpaper or/and monitor didn't setup in config",
+        )));
+    };
+
+    if let Some(monit) = monitor {
+        cur_wallpaper.monitor = monit;
+    }
+
+    Ok(cur_wallpaper)
+}
