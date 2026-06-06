@@ -35,3 +35,11 @@ pub fn get_cur_wallpaper(monitor: Option<Monitor>) -> Result<Wallpaper, Hyprpape
 
     Ok(cur_wallpaper)
 }
+
+/// Set cur wallpaper in config file
+pub fn set_cur_wallpaper(wallpaper: &Wallpaper) -> Result<(), HyprpaperPickerError> {
+    let config_buf = create_if_not_exists()?;
+    let pretty_walp_info = toml::to_string_pretty(wallpaper)?;
+    fs::write(config_buf, pretty_walp_info)?;
+    Ok(())
+}
