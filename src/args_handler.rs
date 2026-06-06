@@ -67,7 +67,31 @@ pub fn handler(args: Args) -> Result<(), HyprpaperPickerError> {
         }
 
         CliCommand::Next { dir_path, monitor } => {
-            todo!();
+            let (dir_path, monitor) = if let Some(dir_p) = dir_path
+                && let Some(monit) = monitor
+            {
+                let dir_p = dir_p.to_dir();
+                (dir_p, monit)
+            } else {
+                let Wallpaper {
+                    monitor: monit,
+                    path,
+                } = get_cur_wallpaper(monitor)?;
+                let dir_p = path.to_dir();
+                (dir_p, monit)
+            };
+
+            let mut wallpapers = get_all_wallpapers(dir_path.clone())?;
+
+            let Wallpaper { path, monitor } = get_cur_wallpaper(Some(monitor))?;
+
+            wallpapers.sort_by_key(|a| a.path.0.clone());
+
+            let wallpaper =
+                next_wallpaper(wallpapers, ActiveWallpaper(Wallpaper { path, monitor }));
+
+            set_new_wallpaper(&wallpaper)?;
+            set_cur_wallpaper(&wallpaper)
         }
 
         CliCommand::Prev { dir_path, monitor } => {
