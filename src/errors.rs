@@ -8,6 +8,9 @@ pub enum HyprpaperPickerError {
     #[error("Hyprctl error: {0}")]
     Hyprctl(#[from] hyprctl::HyprctlError),
 
+    #[error("Config error: {0}")]
+    Config(String),
+
     #[error("From utf8 error: {0}")]
     FromUtf8(#[from] FromUtf8Error),
 
