@@ -7,6 +7,17 @@ use crate::errors::HyprpaperPickerError;
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Path(pub String);
 
+impl Path {
+    pub fn to_dir(&self) -> Self {
+        if !is_wallpaper_path(&self.0) {
+            return self.clone();
+        }
+
+        let (dir_path, _) = self.0.split_at(self.0.rfind('/').expect("Path must have"));
+        Self(dir_path.to_string())
+    }
+}
+
 impl FromStr for Path {
     type Err = String;
 
@@ -118,5 +129,19 @@ mod tests {
     fn valid_wallpaper_path_in_string(#[case] text: &str, #[case] expected: bool) {
         let result = is_wallpaper_path(text);
         assert_eq!(result, expected);
+    }
+
+    #[rstest]
+    #[case(
+        Path("/home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper.png".to_string()),
+        Path("/home/aragami3070/.config/hypr/Wallpapers/Other".to_string())
+    )]
+    #[case(
+        Path("/home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper.png".to_string()),
+        Path("/home/aragami3070/.config/hypr/Wallpapers/Other".to_string())
+    )]
+    fn valid_wallpaper_path_to_dir(#[case] path: Path, #[case] expected: Path) {
+        let res = path.to_dir();
+        assert_eq!(res, expected);
     }
 }
