@@ -10,8 +10,11 @@ use crate::{
 pub fn handler(args: Args) -> Result<(), HyprpaperPickerError> {
     match args.command {
         CliCommand::DisplayLast { monitor } => {
-            todo!()
+            let wallpaper = get_cur_wallpaper(monitor)?;
+            set_new_wallpaper(&wallpaper)?;
+            set_cur_wallpaper(&wallpaper)
         }
+
         CliCommand::Setup {
             wallpaper_path,
             monitor,
@@ -36,6 +39,7 @@ pub fn handler(args: Args) -> Result<(), HyprpaperPickerError> {
             set_new_wallpaper(&wallpaper)?;
             set_cur_wallpaper(&wallpaper)
         }
+
         CliCommand::Rand { dir_path, monitor } => {
             let wallpapers = get_all_wallpapers(dir_path)?;
 
