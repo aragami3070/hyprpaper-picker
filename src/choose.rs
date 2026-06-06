@@ -1,25 +1,22 @@
-use crate::hyprctl::{ActiveWallpaper, NewWallpaper, Wallpaper};
+use crate::hyprctl::{ActiveWallpaper, Wallpaper};
 
-/// Get random NewWallpaper from Wallpaper vec
+/// Get random Wallpaper from wallpapers
 pub fn random_wallpaper(
     mut wallpapers: Vec<Wallpaper>,
     active_wallpaper: ActiveWallpaper,
-) -> NewWallpaper {
+) -> Wallpaper {
     wallpapers.retain(|x| x.path != active_wallpaper.0.path);
 
     let rand_num = rand::random_range(0..wallpapers.len() - 1);
 
-    NewWallpaper(Wallpaper {
+    Wallpaper {
         path: wallpapers[rand_num].path.to_owned(),
         monitor: active_wallpaper.0.monitor,
-    })
+    }
 }
 
-/// Get next NewWallpaper from Wallpaper vec
-pub fn next_wallpaper(
-    wallpapers: Vec<Wallpaper>,
-    active_wallpaper: ActiveWallpaper,
-) -> NewWallpaper {
+/// Get next Wallpaper from wallpapers
+pub fn next_wallpaper(wallpapers: Vec<Wallpaper>, active_wallpaper: ActiveWallpaper) -> Wallpaper {
     let active_wallp_index = wallpapers
         .iter()
         .position(|w| w.path == active_wallpaper.0.path);
@@ -35,16 +32,14 @@ pub fn next_wallpaper(
         None => wallpapers[0].to_owned(),
     };
 
-    NewWallpaper(Wallpaper {
+    Wallpaper {
         path: new_wallpaper.path,
         monitor: active_wallpaper.0.monitor,
-    })
+    }
 }
 
-pub fn prev_wallpaper(
-    wallpapers: Vec<Wallpaper>,
-    active_wallpaper: ActiveWallpaper,
-) -> NewWallpaper {
+/// Get prev Wallpaper from wallpapers
+pub fn prev_wallpaper(wallpapers: Vec<Wallpaper>, active_wallpaper: ActiveWallpaper) -> Wallpaper {
     let active_wallp_index = wallpapers
         .iter()
         .position(|w| w.path == active_wallpaper.0.path);
@@ -62,10 +57,10 @@ pub fn prev_wallpaper(
         None => wallpapers[wallpapers.len() - 1].to_owned(),
     };
 
-    NewWallpaper(Wallpaper {
+    Wallpaper {
         path: new_wallpaper.path,
         monitor: active_wallpaper.0.monitor,
-    })
+    }
 }
 
 #[cfg(test)]
@@ -109,7 +104,7 @@ mod tests {
 
         assert_eq!(
             next_wallpaper(wallpapers, ActiveWallpaper(active_wallpaper)),
-            NewWallpaper(except_wallpaper)
+            except_wallpaper
         );
     }
 
@@ -148,7 +143,7 @@ mod tests {
 
         assert_eq!(
             prev_wallpaper(wallpapers, ActiveWallpaper(active_wallpaper)),
-            NewWallpaper(except_wallpaper)
+            except_wallpaper
         );
     }
 }
