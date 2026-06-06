@@ -28,7 +28,7 @@ pub enum CliCommand {
     /// Get next wallpaper
     Next {
         #[clap(long, short)]
-        dir_path: Path,
+        dir_path: Option<Path>,
         #[clap(long, short)]
         monitor: Option<Monitor>,
     },
@@ -36,7 +36,7 @@ pub enum CliCommand {
     /// Get prev wallpaper
     Prev {
         #[clap(long, short)]
-        dir_path: Path,
+        dir_path: Option<Path>,
         #[clap(long, short)]
         monitor: Option<Monitor>,
     },
@@ -44,7 +44,7 @@ pub enum CliCommand {
     /// Get random wallpaper
     Rand {
         #[clap(long, short)]
-        dir_path: Path,
+        dir_path: Option<Path>,
         #[clap(long, short)]
         monitor: Option<Monitor>,
     },
