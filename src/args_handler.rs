@@ -24,6 +24,7 @@ pub fn handler(args: Args) -> Result<(), HyprpaperPickerError> {
                     "wallpaper file must be: png, jpg, jpeg or jxl".to_string(),
                 ));
             }
+
             let monitor = if let Some(monit) = monitor {
                 monit
             } else {
@@ -41,19 +42,7 @@ pub fn handler(args: Args) -> Result<(), HyprpaperPickerError> {
         }
 
         CliCommand::Rand { dir_path, monitor } => {
-            let (dir_path, monitor) = if let Some(dir_p) = dir_path
-                && let Some(monit) = monitor
-            {
-                let dir_p = dir_p.to_dir();
-                (dir_p, monit)
-            } else {
-                let Wallpaper {
-                    monitor: monit,
-                    path,
-                } = get_cur_wallpaper(monitor)?;
-                let dir_p = path.to_dir();
-                (dir_p, monit)
-            };
+            let (dir_path, monitor) = setup_dir_path_and_monitor(dir_path, monitor)?;
 
             let wallpapers = get_all_wallpapers(dir_path.clone())?;
 
@@ -67,19 +56,7 @@ pub fn handler(args: Args) -> Result<(), HyprpaperPickerError> {
         }
 
         CliCommand::Next { dir_path, monitor } => {
-            let (dir_path, monitor) = if let Some(dir_p) = dir_path
-                && let Some(monit) = monitor
-            {
-                let dir_p = dir_p.to_dir();
-                (dir_p, monit)
-            } else {
-                let Wallpaper {
-                    monitor: monit,
-                    path,
-                } = get_cur_wallpaper(monitor)?;
-                let dir_p = path.to_dir();
-                (dir_p, monit)
-            };
+            let (dir_path, monitor) = setup_dir_path_and_monitor(dir_path, monitor)?;
 
             let mut wallpapers = get_all_wallpapers(dir_path.clone())?;
 
@@ -95,19 +72,7 @@ pub fn handler(args: Args) -> Result<(), HyprpaperPickerError> {
         }
 
         CliCommand::Prev { dir_path, monitor } => {
-            let (dir_path, monitor) = if let Some(dir_p) = dir_path
-                && let Some(monit) = monitor
-            {
-                let dir_p = dir_p.to_dir();
-                (dir_p, monit)
-            } else {
-                let Wallpaper {
-                    monitor: monit,
-                    path,
-                } = get_cur_wallpaper(monitor)?;
-                let dir_p = path.to_dir();
-                (dir_p, monit)
-            };
+            let (dir_path, monitor) = setup_dir_path_and_monitor(dir_path, monitor)?;
 
             let mut wallpapers = get_all_wallpapers(dir_path.clone())?;
 
@@ -122,4 +87,24 @@ pub fn handler(args: Args) -> Result<(), HyprpaperPickerError> {
             set_cur_wallpaper(&wallpaper)
         }
     }
+}
+
+fn setup_dir_path_and_monitor(
+    dir_path: Option<crate::hyprctl::Path>,
+    monitor: Option<crate::hyprctl::Monitor>,
+) -> Result<(crate::hyprctl::Path, crate::hyprctl::Monitor), HyprpaperPickerError> {
+    let (dir_path, monitor) = if let Some(dir_p) = dir_path
+        && let Some(monit) = monitor
+    {
+        let dir_p = dir_p.to_dir();
+        (dir_p, monit)
+    } else {
+        let Wallpaper {
+            monitor: monit,
+            path,
+        } = get_cur_wallpaper(monitor)?;
+        let dir_p = path.to_dir();
+        (dir_p, monit)
+    };
+    Ok((dir_path, monitor))
 }
