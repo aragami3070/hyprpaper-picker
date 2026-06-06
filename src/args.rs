@@ -11,6 +11,7 @@ pub struct Args {
 
 #[derive(Subcommand)]
 pub enum CliCommand {
+    DisplayLast,
     /// Setup monitor and wallpaper
     Setup {
         #[clap(long, short)]

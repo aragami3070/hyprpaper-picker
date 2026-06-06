@@ -7,6 +7,9 @@ use crate::{
 
 pub fn handler(args: Args) -> Result<(), HyprpaperPickerError> {
     match args.command {
+        CliCommand::DisplayLast => {
+            todo!()
+        }
         CliCommand::Setup {
             wallpaper_path,
             monitor,
