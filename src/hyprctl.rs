@@ -1,10 +1,10 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::{error::Error, fmt, process::Command, str::FromStr};
 
 use crate::errors::HyprpaperPickerError;
 
 /// Path to dir or file
-#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Path(pub String);
 
 impl FromStr for Path {
@@ -24,11 +24,23 @@ impl FromStr for Path {
 }
 
 /// Monitor port (for example DP-2 or eDP-1)
-#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Monitor(pub String);
 
+impl FromStr for Monitor {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.is_empty() {
+            Err("Monitor cannot be empty".to_string())
+        } else {
+            Ok(Monitor(s.to_string()))
+        }
+    }
+}
+
 /// Wallpaper info
-#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Wallpaper {
     pub path: Path,
     pub monitor: Monitor,
