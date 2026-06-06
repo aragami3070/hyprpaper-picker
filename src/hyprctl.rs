@@ -15,8 +15,6 @@ impl FromStr for Path {
             Err("Path cannot be empty".to_string())
         } else if !s.contains('/') {
             Err("Path must have '/'".to_string())
-        } else if !is_wallpaper_path(s) {
-            Err("File can be '.png', '.jpg', '.jpeg', '.jxl'".to_string())
         } else {
             Ok(Path(s.to_string()))
         }
@@ -80,7 +78,7 @@ impl fmt::Display for HyprctlError {
 }
 
 /// Checks the path is contained in the string
-fn is_wallpaper_path(text: &str) -> bool {
+pub fn is_wallpaper_path(text: &str) -> bool {
     text.contains(".png")
         || text.contains(".jpg")
         || text.contains(".jpeg")
