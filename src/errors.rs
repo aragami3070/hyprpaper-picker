@@ -11,6 +11,9 @@ pub enum HyprpaperPickerError {
     #[error("Config error: {0}")]
     Config(String),
 
+    #[error("Input error: {0}")]
+    Input(String),
+
     #[error("From utf8 error: {0}")]
     FromUtf8(#[from] FromUtf8Error),
 
