@@ -88,7 +88,7 @@ fn is_wallpaper_path(text: &str) -> bool {
 }
 
 /// Set new wallpaper using `hyprctl hyprpaper wallpaper`
-pub fn set_new_wallpaper(new_wallpaper: Wallpaper) -> Result<(), HyprpaperPickerError> {
+pub fn set_new_wallpaper(new_wallpaper: &Wallpaper) -> Result<(), HyprpaperPickerError> {
     let settings = format!("{},{}", new_wallpaper.monitor.0, new_wallpaper.path.0);
 
     let wallpaper_set = Command::new("hyprctl")
@@ -98,14 +98,7 @@ pub fn set_new_wallpaper(new_wallpaper: Wallpaper) -> Result<(), HyprpaperPicker
     if !wallpaper_set.status.success() {
         return Err(HyprpaperPickerError::Hyprctl(HyprctlError {
             kind: HyprctlErrorKind::WallpaperSet,
-            description: String::from_utf8(wallpaper_set.stdout)?,
-        }));
-    }
-
-    if !String::from_utf8(wallpaper_set.stdout.clone())?.contains("ok") {
-        return Err(HyprpaperPickerError::Hyprctl(HyprctlError {
-            kind: HyprctlErrorKind::WallpaperSet,
-            description: String::from_utf8(wallpaper_set.stdout)?,
+            description: String::from_utf8(wallpaper_set.stderr)?,
         }));
     }
 
