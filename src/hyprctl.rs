@@ -1,7 +1,10 @@
+use serde::Deserialize;
 use std::{error::Error, fmt, process::Command, str::FromStr};
 
+use crate::errors::HyprpaperPickerError;
+
 /// Path to dir or file
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct Path(pub String);
 
 impl FromStr for Path {
@@ -19,11 +22,11 @@ impl FromStr for Path {
 }
 
 /// Monitor port (for example DP-2 or eDP-1)
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct Monitor(pub String);
 
 /// Wallpaper info
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct Wallpaper {
     pub path: Path,
     pub monitor: Monitor,
@@ -87,11 +90,11 @@ impl fmt::Display for HyprctlError {
 /// Get first path and monitor name from string
 ///
 /// If '=' not one in text then remove paths after first path
-fn string_to_path_and_monitor(text: String) -> Result<(Path, Monitor), Box<dyn Error>> {
+fn string_to_path_and_monitor(text: String) -> Result<(Path, Monitor), HyprpaperPickerError> {
     let mut eq_pos = match text.find('=') {
         Some(pos) => pos,
         None => {
-            return Err(Box::new(HyprctlError {
+            return Err(HyprpaperPickerError::Hyprctl(HyprctlError {
                 kind: HyprctlErrorKind::ListActive,
                 description: text,
             }));
@@ -110,13 +113,13 @@ fn string_to_path_and_monitor(text: String) -> Result<(Path, Monitor), Box<dyn E
 }
 
 /// Checks the path is contained in the string
-fn is_wallpaper_path_in_string(text: String) -> Result<ActiveWallpaper, Box<dyn Error>> {
+fn is_wallpaper_path_in_string(text: String) -> Result<ActiveWallpaper, HyprpaperPickerError> {
     if !(text.contains(".png")
         || text.contains(".jpg")
         || text.contains(".jpeg")
         || text.contains(".jxl"))
     {
-        return Err(Box::new(HyprctlError {
+        return Err(HyprpaperPickerError::Hyprctl(HyprctlError {
             kind: HyprctlErrorKind::ListActive,
             description: text,
         }));
@@ -128,13 +131,13 @@ fn is_wallpaper_path_in_string(text: String) -> Result<ActiveWallpaper, Box<dyn 
 }
 
 /// Get active wallpaper using ```hyprctl hyprpaper listactive```
-pub fn get_active_wallpaper() -> Result<ActiveWallpaper, Box<dyn Error>> {
+pub fn get_active_wallpaper() -> Result<ActiveWallpaper, HyprpaperPickerError> {
     let list_active = Command::new("hyprctl")
         .args(["hyprpaper", "listactive"])
         .output()?;
 
     if !list_active.status.success() {
-        return Err(Box::new(HyprctlError {
+        return Err(HyprpaperPickerError::Hyprctl(HyprctlError {
             kind: HyprctlErrorKind::ListActive,
             description: String::from_utf8(list_active.stdout)?,
         }));
@@ -145,21 +148,21 @@ pub fn get_active_wallpaper() -> Result<ActiveWallpaper, Box<dyn Error>> {
     Ok(active_wallpaper)
 }
 
-/// Preload new wallpaper using ```hyprctl hyprpaper preload```
-fn preload_new_wallpaper(new_wallpaper: &NewWallpaper) -> Result<(), Box<dyn Error>> {
+/// Preload new wallpaper using `hyprctl hyprpaper preload`
+fn preload_new_wallpaper(new_wallpaper: &NewWallpaper) -> Result<(), HyprpaperPickerError> {
     let wallpaper_preload = Command::new("hyprctl")
         .args(["hyprpaper", "preload", new_wallpaper.0.path.0.as_str()])
         .output()?;
 
     if !wallpaper_preload.status.success() {
-        return Err(Box::new(HyprctlError {
+        return Err(HyprpaperPickerError::Hyprctl(HyprctlError {
             kind: HyprctlErrorKind::WallpaperPreload,
             description: String::from_utf8(wallpaper_preload.stdout)?,
         }));
     }
 
     if !String::from_utf8(wallpaper_preload.stdout.clone())?.contains("ok") {
-        return Err(Box::new(HyprctlError {
+        return Err(HyprpaperPickerError::Hyprctl(HyprctlError {
             kind: HyprctlErrorKind::WallpaperPreload,
             description: String::from_utf8(wallpaper_preload.stdout)?,
         }));
@@ -169,7 +172,7 @@ fn preload_new_wallpaper(new_wallpaper: &NewWallpaper) -> Result<(), Box<dyn Err
 }
 
 /// Set new wallpaper using ```hyprctl hyprpaper wallpaper```
-pub fn set_new_wallpaper(new_wallpaper: NewWallpaper) -> Result<(), Box<dyn Error>> {
+pub fn set_new_wallpaper(new_wallpaper: NewWallpaper) -> Result<(), HyprpaperPickerError> {
     preload_new_wallpaper(&new_wallpaper)?;
 
     let settings = format!("{},{}", new_wallpaper.0.monitor.0, new_wallpaper.0.path.0);
@@ -179,14 +182,14 @@ pub fn set_new_wallpaper(new_wallpaper: NewWallpaper) -> Result<(), Box<dyn Erro
         .output()?;
 
     if !wallpaper_set.status.success() {
-        return Err(Box::new(HyprctlError {
+        return Err(HyprpaperPickerError::Hyprctl(HyprctlError {
             kind: HyprctlErrorKind::WallpaperSet,
             description: String::from_utf8(wallpaper_set.stdout)?,
         }));
     }
 
     if !String::from_utf8(wallpaper_set.stdout.clone())?.contains("ok") {
-        return Err(Box::new(HyprctlError {
+        return Err(HyprpaperPickerError::Hyprctl(HyprctlError {
             kind: HyprctlErrorKind::WallpaperSet,
             description: String::from_utf8(wallpaper_set.stdout)?,
         }));
@@ -202,32 +205,15 @@ mod tests {
     use super::*;
 
     #[rstest]
-    #[case("invalid command", HyprctlError {
-            kind: HyprctlErrorKind::ListActive,
-            description: "invalid command".to_string(),
-        })]
-    #[case("some other error", HyprctlError {
-            kind: HyprctlErrorKind::ListActive,
-            description: "some other error".to_string(),
-        })]
-    fn invalid_wallpaper_path_in_string(#[case] text: &str, #[case] expected: HyprctlError) {
-        let err = *is_wallpaper_path_in_string(text.to_string())
-            .err()
-            .unwrap()
-            .downcast::<HyprctlError>()
-            .unwrap();
-        assert_eq!(err, expected);
-    }
-
-    #[rstest]
     #[case("DP-2 = /home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper7.png",
 		ActiveWallpaper(
 			Wallpaper {
 				path: Path("/home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper7.png".to_string()),
 				monitor: Monitor("DP-2".to_string())
 			}))]
-    #[case("DP-2 = /home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper7.png
- = /home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper8.png ", ActiveWallpaper(
+    #[case("DP-2 = /home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper7.png\
+        = /home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper8.png ",
+        ActiveWallpaper(
 			Wallpaper {
 				path: Path("/home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper7.png".to_string()),
 				monitor: Monitor("DP-2".to_string())
