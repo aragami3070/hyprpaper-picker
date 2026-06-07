@@ -4,7 +4,7 @@ use crate::{
     config::{get_cur_wallpaper, set_cur_wallpaper},
     dir_scan::get_all_wallpapers,
     errors::HyprpaperPickerError,
-    hyprctl::{ActiveWallpaper, Monitor, Path, Wallpaper, is_wallpaper_path, set_new_wallpaper},
+    hyprctl::{Monitor, Path, Wallpaper, is_wallpaper_path, set_new_wallpaper},
 };
 
 pub fn handler(args: Args) -> Result<(), HyprpaperPickerError> {
@@ -23,40 +23,40 @@ pub fn handler(args: Args) -> Result<(), HyprpaperPickerError> {
         CliCommand::Rand { dir_path, monitor } => choose_wallpaper_handler(
             dir_path,
             monitor,
-            |path: Path, monitor: Monitor, wallpapers: Vec<Wallpaper>| -> Wallpaper {
-                random_wallpaper(wallpapers, ActiveWallpaper(Wallpaper { path, monitor }))
+            |active_wallpaper: Wallpaper, wallpapers: Vec<Wallpaper>| -> Wallpaper {
+                random_wallpaper(wallpapers, active_wallpaper)
             },
         ),
 
         CliCommand::Next { dir_path, monitor } => choose_wallpaper_handler(
             dir_path,
             monitor,
-            |path: Path, monitor: Monitor, wallpapers: Vec<Wallpaper>| -> Wallpaper {
-                next_wallpaper(wallpapers, ActiveWallpaper(Wallpaper { path, monitor }))
+            |active_wallpaper: Wallpaper, wallpapers: Vec<Wallpaper>| -> Wallpaper {
+                next_wallpaper(&wallpapers, active_wallpaper)
             },
         ),
         CliCommand::Prev { dir_path, monitor } => choose_wallpaper_handler(
             dir_path,
             monitor,
-            |path: Path, monitor: Monitor, wallpapers: Vec<Wallpaper>| -> Wallpaper {
-                prev_wallpaper(wallpapers, ActiveWallpaper(Wallpaper { path, monitor }))
+            |active_wallpaper: Wallpaper, wallpapers: Vec<Wallpaper>| -> Wallpaper {
+                prev_wallpaper(&wallpapers, active_wallpaper)
             },
         ),
     }
 }
 
-fn choose_wallpaper_handler<F: Fn(Path, Monitor, Vec<Wallpaper>) -> Wallpaper>(
+fn choose_wallpaper_handler<F: Fn(Wallpaper, Vec<Wallpaper>) -> Wallpaper>(
     dir_path: Option<Path>,
     monitor: Option<Monitor>,
     choose_clouser: F,
 ) -> Result<(), HyprpaperPickerError> {
     let (dir_path, monitor) = setup_dir_path_and_monitor(dir_path, monitor)?;
 
-    let Wallpaper { path, monitor } = get_cur_wallpaper(Some(monitor))?;
+    let active_wallpaper = get_cur_wallpaper(Some(monitor))?;
     let mut wallpapers = get_all_wallpapers(dir_path.clone())?;
     wallpapers.sort_by(|a, b| a.path.0.cmp(&b.path.0));
 
-    let wallpaper = choose_clouser(path, monitor, wallpapers);
+    let wallpaper = choose_clouser(active_wallpaper, wallpapers);
 
     set_new_wallpaper(&wallpaper)?;
     set_cur_wallpaper(&wallpaper)

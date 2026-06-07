@@ -1,57 +1,54 @@
-use crate::hyprctl::{ActiveWallpaper, Wallpaper};
+use crate::hyprctl::Wallpaper;
 
 /// Get random Wallpaper from wallpapers
-pub fn random_wallpaper(
-    mut wallpapers: Vec<Wallpaper>,
-    active_wallpaper: ActiveWallpaper,
-) -> Wallpaper {
+pub fn random_wallpaper(mut wallpapers: Vec<Wallpaper>, active_wallpaper: Wallpaper) -> Wallpaper {
     match wallpapers.len() {
-        0 => active_wallpaper.0,
+        0 => active_wallpaper,
         1 => wallpapers[0].clone(),
         _ => {
-            wallpapers.retain(|x| x.path != active_wallpaper.0.path);
+            wallpapers.retain(|x| x.path != active_wallpaper.path);
 
             let rand_num = rand::random_range(0..wallpapers.len() - 1);
 
             Wallpaper {
-                path: wallpapers[rand_num].path.to_owned(),
-                monitor: active_wallpaper.0.monitor,
+                path: wallpapers[rand_num].path.clone(),
+                monitor: active_wallpaper.monitor,
             }
         }
     }
 }
 
 /// Get next Wallpaper from wallpapers
-pub fn next_wallpaper(wallpapers: Vec<Wallpaper>, active_wallpaper: ActiveWallpaper) -> Wallpaper {
+pub fn next_wallpaper(wallpapers: &[Wallpaper], active_wallpaper: Wallpaper) -> Wallpaper {
     let active_wallp_index = wallpapers
         .iter()
-        .position(|w| w.path == active_wallpaper.0.path);
+        .position(|w| w.path == active_wallpaper.path);
 
     let new_wallpaper = match active_wallp_index {
         Some(i) => wallpapers[(i + 1) % wallpapers.len()].clone(),
-        None => wallpapers[0].to_owned(),
+        None => wallpapers[0].clone(),
     };
 
     Wallpaper {
         path: new_wallpaper.path,
-        monitor: active_wallpaper.0.monitor,
+        monitor: active_wallpaper.monitor,
     }
 }
 
 /// Get prev Wallpaper from wallpapers
-pub fn prev_wallpaper(wallpapers: Vec<Wallpaper>, active_wallpaper: ActiveWallpaper) -> Wallpaper {
+pub fn prev_wallpaper(wallpapers: &[Wallpaper], active_wallpaper: Wallpaper) -> Wallpaper {
     let active_wallp_index = wallpapers
         .iter()
-        .position(|w| w.path == active_wallpaper.0.path);
+        .position(|w| w.path == active_wallpaper.path);
 
     let new_wallpaper = match active_wallp_index {
         Some(i) => wallpapers[(i + wallpapers.len() - 1) % wallpapers.len()].clone(),
-        None => wallpapers[wallpapers.len() - 1].to_owned(),
+        None => wallpapers[wallpapers.len() - 1].clone(),
     };
 
     Wallpaper {
         path: new_wallpaper.path,
-        monitor: active_wallpaper.0.monitor,
+        monitor: active_wallpaper.monitor,
     }
 }
 
@@ -72,13 +69,13 @@ mod tests {
     )]
     fn valid_next_wallpaper_choose(#[case] active_wallp: &str, #[case] except: &str) {
         let active_wallpaper = Wallpaper {
-            path: Path(active_wallp.to_owned()),
-            monitor: Monitor("eDP-1".to_owned()),
+            path: Path(active_wallp.to_string()),
+            monitor: Monitor("eDP-1".to_string()),
         };
 
         let except_wallpaper = Wallpaper {
-            path: Path(except.to_owned()),
-            monitor: Monitor("eDP-1".to_owned()),
+            path: Path(except.to_string()),
+            monitor: Monitor("eDP-1".to_string()),
         };
 
         let mut wallpapers: Vec<Wallpaper> = vec![
@@ -86,16 +83,16 @@ mod tests {
             except_wallpaper.clone(),
             Wallpaper {
                 path: Path(
-                    "/home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper6.png".to_owned(),
+                    "/home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper6.png".to_string(),
                 ),
-                monitor: Monitor("".to_owned()),
+                monitor: Monitor("".to_string()),
             },
         ];
 
         wallpapers.sort_by_key(|a| a.path.0.clone());
 
         assert_eq!(
-            next_wallpaper(wallpapers, ActiveWallpaper(active_wallpaper)),
+            next_wallpaper(&wallpapers, active_wallpaper),
             except_wallpaper
         );
     }
@@ -111,13 +108,13 @@ mod tests {
     )]
     fn valid_prev_wallpaper_choose(#[case] active_wallp: &str, #[case] except: &str) {
         let active_wallpaper = Wallpaper {
-            path: Path(active_wallp.to_owned()),
-            monitor: Monitor("eDP-1".to_owned()),
+            path: Path(active_wallp.to_string()),
+            monitor: Monitor("eDP-1".to_string()),
         };
 
         let except_wallpaper = Wallpaper {
-            path: Path(except.to_owned()),
-            monitor: Monitor("eDP-1".to_owned()),
+            path: Path(except.to_string()),
+            monitor: Monitor("eDP-1".to_string()),
         };
 
         let mut wallpapers: Vec<Wallpaper> = vec![
@@ -125,16 +122,16 @@ mod tests {
             except_wallpaper.clone(),
             Wallpaper {
                 path: Path(
-                    "/home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper6.png".to_owned(),
+                    "/home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper6.png".to_string(),
                 ),
-                monitor: Monitor("".to_owned()),
+                monitor: Monitor("".to_string()),
             },
         ];
 
         wallpapers.sort_by_key(|a| a.path.0.clone());
 
         assert_eq!(
-            prev_wallpaper(wallpapers, ActiveWallpaper(active_wallpaper)),
+            prev_wallpaper(&wallpapers, active_wallpaper),
             except_wallpaper
         );
     }

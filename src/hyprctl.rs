@@ -55,9 +55,6 @@ pub struct Wallpaper {
     pub monitor: Monitor,
 }
 
-#[derive(Debug, PartialEq, Eq)]
-pub struct ActiveWallpaper(pub Wallpaper);
-
 /// Errors returned by the hyprctl
 #[derive(Debug, PartialEq, Eq)]
 pub struct HyprctlError {
@@ -90,10 +87,10 @@ impl fmt::Display for HyprctlError {
 
 /// Checks the path is contained in the string
 pub fn is_wallpaper_path(text: &str) -> bool {
-    text.contains(".png")
-        || text.contains(".jpg")
-        || text.contains(".jpeg")
-        || text.contains(".jxl")
+    text.ends_with(".png")
+        || text.ends_with(".jpg")
+        || text.ends_with(".jpeg")
+        || text.ends_with(".jxl")
 }
 
 /// Set new wallpaper using `hyprctl hyprpaper wallpaper`
