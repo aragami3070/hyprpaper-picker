@@ -1,36 +1,7 @@
 use serde::{Deserialize, Serialize};
-use std::{error::Error, fmt, process::Command, str::FromStr};
+use std::{error::Error, fmt, path::PathBuf, process::Command, str::FromStr};
 
 use crate::errors::HyprpaperPickerError;
-
-/// Path to dir or file
-#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
-pub struct Path(pub String);
-
-impl Path {
-    pub fn to_dir(&self) -> Self {
-        if !is_wallpaper_path(&self.0) {
-            return self.clone();
-        }
-
-        let (dir_path, _) = self.0.split_at(self.0.rfind('/').expect("Path must have"));
-        Self(dir_path.to_string())
-    }
-}
-
-impl FromStr for Path {
-    type Err = String;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if s.is_empty() {
-            Err("Path cannot be empty".to_string())
-        } else if !s.contains('/') {
-            Err("Path must have '/'".to_string())
-        } else {
-            Ok(Path(s.to_string()))
-        }
-    }
-}
 
 /// Monitor port (for example DP-2 or eDP-1)
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
@@ -51,7 +22,7 @@ impl FromStr for Monitor {
 /// Wallpaper info
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Wallpaper {
-    pub path: Path,
+    pub path: PathBuf,
     pub monitor: Monitor,
 }
 
@@ -85,17 +56,22 @@ impl fmt::Display for HyprctlError {
     }
 }
 
-/// Checks the path is contained in the string
-pub fn is_wallpaper_path(text: &str) -> bool {
-    text.ends_with(".png")
-        || text.ends_with(".jpg")
-        || text.ends_with(".jpeg")
-        || text.ends_with(".jxl")
+/// Checks the path is a valid wallpaper file
+pub fn is_wallpaper_path(path: &std::path::Path) -> bool {
+    if let Some(ext) = path.extension() {
+        ext == "png" || ext == "jpg" || ext == "jpeg" || ext == "jxl"
+    } else {
+        false
+    }
 }
 
 /// Set new wallpaper using `hyprctl hyprpaper wallpaper`
 pub fn set_new_wallpaper(new_wallpaper: &Wallpaper) -> Result<(), HyprpaperPickerError> {
-    let settings = format!("{},{}", new_wallpaper.monitor.0, new_wallpaper.path.0);
+    let settings = format!(
+        "{},{}",
+        new_wallpaper.monitor.0,
+        new_wallpaper.path.display()
+    );
 
     let wallpaper_set = Command::new("hyprctl")
         .args(["hyprpaper", "wallpaper", settings.as_str()])
@@ -124,21 +100,7 @@ mod tests {
     #[case("/home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper.jpeg", true)]
     #[case("/home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper.svg", false)]
     fn valid_wallpaper_path_in_string(#[case] text: &str, #[case] expected: bool) {
-        let result = is_wallpaper_path(text);
+        let result = is_wallpaper_path(std::path::Path::new(text));
         assert_eq!(result, expected);
-    }
-
-    #[rstest]
-    #[case(
-        Path("/home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper.png".to_string()),
-        Path("/home/aragami3070/.config/hypr/Wallpapers/Other".to_string())
-    )]
-    #[case(
-        Path("/home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper.png".to_string()),
-        Path("/home/aragami3070/.config/hypr/Wallpapers/Other".to_string())
-    )]
-    fn valid_wallpaper_path_to_dir(#[case] path: Path, #[case] expected: Path) {
-        let res = path.to_dir();
-        assert_eq!(res, expected);
     }
 }

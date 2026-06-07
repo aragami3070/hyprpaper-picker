@@ -1,33 +1,25 @@
-use std::{fs, io};
+use std::{fs, path::PathBuf};
 
 use crate::{
     errors::HyprpaperPickerError,
-    hyprctl::{Monitor, Path, Wallpaper, is_wallpaper_path},
+    hyprctl::{Monitor, Wallpaper, is_wallpaper_path},
 };
 
 /// Get all path to files from dir path
-pub fn get_all_wallpapers(dir_path: Path) -> Result<Vec<Wallpaper>, HyprpaperPickerError> {
-    let paths = fs::read_dir(dir_path.0)?;
+pub fn get_all_wallpapers(dir_path: PathBuf) -> Result<Vec<Wallpaper>, HyprpaperPickerError> {
+    let paths = fs::read_dir(dir_path)?;
 
     let mut wallpapers = Vec::new();
 
     for wallp_path in paths {
-        let path_pars = match wallp_path?.path().to_str() {
-            Some(path) if is_wallpaper_path(path) => path.to_string(),
-            Some(_) => continue,
-            None => {
-                return Err(HyprpaperPickerError::Io(io::Error::new(
-                    io::ErrorKind::InvalidData,
-                    "can't parse path to wallpaper",
-                )));
-            }
-        };
-
-        let wallpaper = Wallpaper {
-            path: Path(path_pars),
-            monitor: Monitor(String::new()),
-        };
-        wallpapers.push(wallpaper);
+        let path = wallp_path?.path();
+        if path.is_file() && is_wallpaper_path(&path) {
+            let wallpaper = Wallpaper {
+                path,
+                monitor: Monitor(String::new()),
+            };
+            wallpapers.push(wallpaper);
+        }
     }
 
     Ok(wallpapers)

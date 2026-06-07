@@ -1,10 +1,12 @@
+use std::path::PathBuf;
+
 use crate::{
     args::{Args, CliCommand},
     choose::{next_wallpaper, prev_wallpaper, random_wallpaper},
     config::{get_cur_wallpaper, set_cur_wallpaper},
     dir_scan::get_all_wallpapers,
     errors::HyprpaperPickerError,
-    hyprctl::{Monitor, Path, Wallpaper, is_wallpaper_path, set_new_wallpaper},
+    hyprctl::{Monitor, Wallpaper, is_wallpaper_path, set_new_wallpaper},
 };
 
 pub fn handler(args: Args) -> Result<(), HyprpaperPickerError> {
@@ -46,7 +48,7 @@ pub fn handler(args: Args) -> Result<(), HyprpaperPickerError> {
 }
 
 fn choose_wallpaper_handler<F: Fn(Wallpaper, Vec<Wallpaper>) -> Wallpaper>(
-    dir_path: Option<Path>,
+    dir_path: Option<PathBuf>,
     monitor: Option<Monitor>,
     choose_clouser: F,
 ) -> Result<(), HyprpaperPickerError> {
@@ -54,7 +56,7 @@ fn choose_wallpaper_handler<F: Fn(Wallpaper, Vec<Wallpaper>) -> Wallpaper>(
 
     let active_wallpaper = get_cur_wallpaper(Some(monitor))?;
     let mut wallpapers = get_all_wallpapers(dir_path.clone())?;
-    wallpapers.sort_by(|a, b| a.path.0.cmp(&b.path.0));
+    wallpapers.sort_by(|a, b| a.path.cmp(&b.path));
 
     let wallpaper = choose_clouser(active_wallpaper, wallpapers);
 
@@ -63,10 +65,10 @@ fn choose_wallpaper_handler<F: Fn(Wallpaper, Vec<Wallpaper>) -> Wallpaper>(
 }
 
 fn setup_handler(
-    wallpaper_path: Path,
+    wallpaper_path: PathBuf,
     monitor: Option<Monitor>,
 ) -> Result<(), HyprpaperPickerError> {
-    if !is_wallpaper_path(&wallpaper_path.0) {
+    if !is_wallpaper_path(&wallpaper_path) {
         return Err(HyprpaperPickerError::Input(
             "wallpaper file must be: png, jpg, jpeg or jxl".to_string(),
         ));
@@ -87,22 +89,29 @@ fn setup_handler(
     set_cur_wallpaper(&wallpaper)
 }
 
+fn to_dir(path: &std::path::Path) -> PathBuf {
+    if is_wallpaper_path(path) {
+        path.parent().unwrap_or(path).to_path_buf()
+    } else {
+        path.to_path_buf()
+    }
+}
+
 fn setup_dir_path_and_monitor(
-    inp_dir_path: Option<Path>,
+    inp_dir_path: Option<PathBuf>,
     inp_monitor: Option<Monitor>,
-) -> Result<(Path, Monitor), HyprpaperPickerError> {
+) -> Result<(PathBuf, Monitor), HyprpaperPickerError> {
     let (dir_path, monitor) = if let Some(dir_path) = &inp_dir_path
         && let Some(monitor) = inp_monitor
     {
-        let dir_path = dir_path.to_dir();
-        (dir_path, monitor)
+        (to_dir(dir_path), monitor)
     } else {
         let Wallpaper { monitor, path } = get_cur_wallpaper(inp_monitor)?;
 
         let dir_path = if let Some(dir_p) = inp_dir_path {
-            dir_p
+            to_dir(&dir_p)
         } else {
-            path.to_dir()
+            to_dir(&path)
         };
 
         (dir_path, monitor)

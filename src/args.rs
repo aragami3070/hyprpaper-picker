@@ -1,6 +1,7 @@
 use clap::{Parser, Subcommand};
+use std::path::PathBuf;
 
-use crate::hyprctl::{Monitor, Path};
+use crate::hyprctl::Monitor;
 
 #[derive(Parser)]
 #[command(version, about)]
@@ -20,7 +21,7 @@ pub enum CliCommand {
     /// Setup monitor and wallpaper
     Setup {
         #[clap(long, short)]
-        wallpaper_path: Path,
+        wallpaper_path: PathBuf,
         #[clap(long, short)]
         monitor: Option<Monitor>,
     },
@@ -28,7 +29,7 @@ pub enum CliCommand {
     /// Get next wallpaper
     Next {
         #[clap(long, short)]
-        dir_path: Option<Path>,
+        dir_path: Option<PathBuf>,
         #[clap(long, short)]
         monitor: Option<Monitor>,
     },
@@ -36,7 +37,7 @@ pub enum CliCommand {
     /// Get prev wallpaper
     Prev {
         #[clap(long, short)]
-        dir_path: Option<Path>,
+        dir_path: Option<PathBuf>,
         #[clap(long, short)]
         monitor: Option<Monitor>,
     },
@@ -44,7 +45,7 @@ pub enum CliCommand {
     /// Get random wallpaper
     Rand {
         #[clap(long, short)]
-        dir_path: Option<Path>,
+        dir_path: Option<PathBuf>,
         #[clap(long, short)]
         monitor: Option<Monitor>,
     },

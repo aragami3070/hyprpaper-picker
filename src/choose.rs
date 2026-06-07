@@ -55,8 +55,9 @@ pub fn prev_wallpaper(wallpapers: &[Wallpaper], active_wallpaper: Wallpaper) -> 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::hyprctl::{Monitor, Path};
+    use crate::hyprctl::Monitor;
     use rstest::rstest;
+    use std::path::PathBuf;
 
     #[rstest]
     #[case(
@@ -69,12 +70,12 @@ mod tests {
     )]
     fn valid_next_wallpaper_choose(#[case] active_wallp: &str, #[case] except: &str) {
         let active_wallpaper = Wallpaper {
-            path: Path(active_wallp.to_string()),
+            path: PathBuf::from(active_wallp),
             monitor: Monitor("eDP-1".to_string()),
         };
 
         let except_wallpaper = Wallpaper {
-            path: Path(except.to_string()),
+            path: PathBuf::from(except),
             monitor: Monitor("eDP-1".to_string()),
         };
 
@@ -82,14 +83,14 @@ mod tests {
             active_wallpaper.clone(),
             except_wallpaper.clone(),
             Wallpaper {
-                path: Path(
-                    "/home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper6.png".to_string(),
+                path: PathBuf::from(
+                    "/home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper6.png",
                 ),
                 monitor: Monitor("".to_string()),
             },
         ];
 
-        wallpapers.sort_by_key(|a| a.path.0.clone());
+        wallpapers.sort_by(|a, b| a.path.cmp(&b.path));
 
         assert_eq!(
             next_wallpaper(&wallpapers, active_wallpaper),
@@ -108,12 +109,12 @@ mod tests {
     )]
     fn valid_prev_wallpaper_choose(#[case] active_wallp: &str, #[case] except: &str) {
         let active_wallpaper = Wallpaper {
-            path: Path(active_wallp.to_string()),
+            path: PathBuf::from(active_wallp),
             monitor: Monitor("eDP-1".to_string()),
         };
 
         let except_wallpaper = Wallpaper {
-            path: Path(except.to_string()),
+            path: PathBuf::from(except),
             monitor: Monitor("eDP-1".to_string()),
         };
 
@@ -121,14 +122,14 @@ mod tests {
             active_wallpaper.clone(),
             except_wallpaper.clone(),
             Wallpaper {
-                path: Path(
-                    "/home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper6.png".to_string(),
+                path: PathBuf::from(
+                    "/home/aragami3070/.config/hypr/Wallpapers/Other/wallpaper6.png",
                 ),
                 monitor: Monitor("".to_string()),
             },
         ];
 
-        wallpapers.sort_by_key(|a| a.path.0.clone());
+        wallpapers.sort_by(|a, b| a.path.cmp(&b.path));
 
         assert_eq!(
             prev_wallpaper(&wallpapers, active_wallpaper),
