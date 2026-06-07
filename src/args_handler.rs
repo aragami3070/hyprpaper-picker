@@ -4,7 +4,7 @@ use crate::{
     config::{get_cur_wallpaper, set_cur_wallpaper},
     dir_scan::get_all_wallpapers,
     errors::HyprpaperPickerError,
-    hyprctl::{ActiveWallpaper, Wallpaper, is_wallpaper_path, set_new_wallpaper},
+    hyprctl::{ActiveWallpaper, Monitor, Path, Wallpaper, is_wallpaper_path, set_new_wallpaper},
 };
 
 pub fn handler(args: Args) -> Result<(), HyprpaperPickerError> {
@@ -90,21 +90,25 @@ pub fn handler(args: Args) -> Result<(), HyprpaperPickerError> {
 }
 
 fn setup_dir_path_and_monitor(
-    dir_path: Option<crate::hyprctl::Path>,
-    monitor: Option<crate::hyprctl::Monitor>,
-) -> Result<(crate::hyprctl::Path, crate::hyprctl::Monitor), HyprpaperPickerError> {
-    let (dir_path, monitor) = if let Some(dir_p) = dir_path
-        && let Some(monit) = monitor
+    inp_dir_path: Option<Path>,
+    inp_monitor: Option<Monitor>,
+) -> Result<(Path, Monitor), HyprpaperPickerError> {
+    let (dir_path, monitor) = if let Some(dir_path) = &inp_dir_path
+        && let Some(monitor) = inp_monitor
     {
-        let dir_p = dir_p.to_dir();
-        (dir_p, monit)
+        let dir_path = dir_path.to_dir();
+        (dir_path, monitor)
     } else {
-        let Wallpaper {
-            monitor: monit,
-            path,
-        } = get_cur_wallpaper(monitor)?;
-        let dir_p = path.to_dir();
-        (dir_p, monit)
+        let Wallpaper { monitor, path } = get_cur_wallpaper(inp_monitor)?;
+
+        let dir_path = if let Some(dir_p) = inp_dir_path {
+            dir_p
+        } else {
+            path.to_dir()
+        };
+
+        (dir_path, monitor)
     };
+
     Ok((dir_path, monitor))
 }
