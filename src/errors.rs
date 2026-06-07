@@ -20,9 +20,9 @@ pub enum HyprpaperPickerError {
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
 
-    #[error("Toml error: {0}")]
+    #[error("Toml serialize error: {0}")]
     TomlSer(#[from] toml::ser::Error),
 
-    #[error("Toml aboba error: {0}")]
+    #[error("Toml deserialize error: {0}")]
     TomlDeser(#[from] toml::de::Error),
 }
