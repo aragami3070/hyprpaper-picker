@@ -5,13 +5,19 @@ pub fn random_wallpaper(
     mut wallpapers: Vec<Wallpaper>,
     active_wallpaper: ActiveWallpaper,
 ) -> Wallpaper {
-    wallpapers.retain(|x| x.path != active_wallpaper.0.path);
+    match wallpapers.len() {
+        0 => active_wallpaper.0,
+        1 => wallpapers[0].clone(),
+        _ => {
+            wallpapers.retain(|x| x.path != active_wallpaper.0.path);
 
-    let rand_num = rand::random_range(0..wallpapers.len() - 1);
+            let rand_num = rand::random_range(0..wallpapers.len() - 1);
 
-    Wallpaper {
-        path: wallpapers[rand_num].path.to_owned(),
-        monitor: active_wallpaper.0.monitor,
+            Wallpaper {
+                path: wallpapers[rand_num].path.to_owned(),
+                monitor: active_wallpaper.0.monitor,
+            }
+        }
     }
 }
 
