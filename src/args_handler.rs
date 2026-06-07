@@ -20,7 +20,13 @@ pub fn handler(args: Args) -> Result<(), HyprpaperPickerError> {
             monitor,
         } => setup_handler(wallpaper_path, monitor),
 
-        CliCommand::Rand { dir_path, monitor } => rand_handler(dir_path, monitor),
+        CliCommand::Rand { dir_path, monitor } => choose_wallpaper_handler(
+            dir_path,
+            monitor,
+            |path: Path, monitor: Monitor, wallpapers: Vec<Wallpaper>| -> Wallpaper {
+                random_wallpaper(wallpapers, ActiveWallpaper(Wallpaper { path, monitor }))
+            },
+        ),
 
         CliCommand::Next { dir_path, monitor } => choose_wallpaper_handler(
             dir_path,
@@ -56,22 +62,6 @@ fn choose_wallpaper_handler<F: Fn(Path, Monitor, Vec<Wallpaper>) -> Wallpaper>(
     set_cur_wallpaper(&wallpaper)
 }
 
-fn rand_handler(
-    dir_path: Option<Path>,
-    monitor: Option<Monitor>,
-) -> Result<(), HyprpaperPickerError> {
-    let (dir_path, monitor) = setup_dir_path_and_monitor(dir_path, monitor)?;
-
-    let wallpapers = get_all_wallpapers(dir_path.clone())?;
-
-    let Wallpaper { path, monitor } = get_cur_wallpaper(Some(monitor))?;
-
-    let wallpaper = random_wallpaper(wallpapers, ActiveWallpaper(Wallpaper { path, monitor }));
-
-    set_new_wallpaper(&wallpaper)?;
-    set_cur_wallpaper(&wallpaper)
-}
-
 fn setup_handler(
     wallpaper_path: Path,
     monitor: Option<Monitor>,
@@ -85,8 +75,7 @@ fn setup_handler(
     let monitor = if let Some(monit) = monitor {
         monit
     } else {
-        let Wallpaper { monitor: monit, .. } = get_cur_wallpaper(monitor)?;
-        monit
+        get_cur_wallpaper(monitor)?.monitor
     };
 
     let wallpaper = Wallpaper {
