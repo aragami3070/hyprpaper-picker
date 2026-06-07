@@ -28,13 +28,7 @@ pub fn next_wallpaper(wallpapers: Vec<Wallpaper>, active_wallpaper: ActiveWallpa
         .position(|w| w.path == active_wallpaper.0.path);
 
     let new_wallpaper = match active_wallp_index {
-        Some(i) => {
-            if let Some(value) = wallpapers.get(i + 1) {
-                value.to_owned()
-            } else {
-                wallpapers[0].to_owned()
-            }
-        }
+        Some(i) => wallpapers[(i + 1) % wallpapers.len()].clone(),
         None => wallpapers[0].to_owned(),
     };
 
@@ -51,15 +45,7 @@ pub fn prev_wallpaper(wallpapers: Vec<Wallpaper>, active_wallpaper: ActiveWallpa
         .position(|w| w.path == active_wallpaper.0.path);
 
     let new_wallpaper = match active_wallp_index {
-        Some(i) => {
-            if i > 0
-                && let Some(value) = wallpapers.get(i - 1)
-            {
-                value.to_owned()
-            } else {
-                wallpapers[wallpapers.len() - 1].to_owned()
-            }
-        }
+        Some(i) => wallpapers[(i + wallpapers.len() - 1) % wallpapers.len()].clone(),
         None => wallpapers[wallpapers.len() - 1].to_owned(),
     };
 
