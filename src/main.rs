@@ -14,7 +14,7 @@ use crate::{args::Args, args_handler::handler};
 fn main() {
     let args: Args = Args::parse();
     if let Err(err) = handler(args) {
-        eprintln!("Error: {err}");
+        eprintln!("{err}");
         process::exit(1)
     };
 }
