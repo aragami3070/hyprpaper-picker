@@ -2,7 +2,7 @@ use std::{fs, io};
 
 use crate::{
     errors::HyprpaperPickerError,
-    hyprctl::{Monitor, Path, Wallpaper},
+    hyprctl::{Monitor, Path, Wallpaper, is_wallpaper_path},
 };
 
 /// Get all path to files from dir path
@@ -13,7 +13,8 @@ pub fn get_all_wallpapers(dir_path: Path) -> Result<Vec<Wallpaper>, HyprpaperPic
 
     for wallp_path in paths {
         let path_pars = match wallp_path?.path().to_str() {
-            Some(path) => path.to_string(),
+            Some(path) if is_wallpaper_path(path) => path.to_string(),
+            Some(_) => continue,
             None => {
                 return Err(HyprpaperPickerError::Io(io::Error::new(
                     io::ErrorKind::InvalidData,
