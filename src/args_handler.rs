@@ -18,75 +18,84 @@ pub fn handler(args: Args) -> Result<(), HyprpaperPickerError> {
         CliCommand::Setup {
             wallpaper_path,
             monitor,
-        } => {
-            if !is_wallpaper_path(&wallpaper_path.0) {
-                return Err(HyprpaperPickerError::Input(
-                    "wallpaper file must be: png, jpg, jpeg or jxl".to_string(),
-                ));
-            }
+        } => setup_handler(wallpaper_path, monitor),
 
-            let monitor = if let Some(monit) = monitor {
-                monit
-            } else {
-                let Wallpaper { monitor: monit, .. } = get_cur_wallpaper(monitor)?;
-                monit
-            };
+        CliCommand::Rand { dir_path, monitor } => rand_handler(dir_path, monitor),
 
-            let wallpaper = Wallpaper {
-                path: wallpaper_path,
-                monitor,
-            };
-
-            set_new_wallpaper(&wallpaper)?;
-            set_cur_wallpaper(&wallpaper)
-        }
-
-        CliCommand::Rand { dir_path, monitor } => {
-            let (dir_path, monitor) = setup_dir_path_and_monitor(dir_path, monitor)?;
-
-            let wallpapers = get_all_wallpapers(dir_path.clone())?;
-
-            let Wallpaper { path, monitor } = get_cur_wallpaper(Some(monitor))?;
-
-            let wallpaper =
-                random_wallpaper(wallpapers, ActiveWallpaper(Wallpaper { path, monitor }));
-
-            set_new_wallpaper(&wallpaper)?;
-            set_cur_wallpaper(&wallpaper)
-        }
-
-        CliCommand::Next { dir_path, monitor } => {
-            let (dir_path, monitor) = setup_dir_path_and_monitor(dir_path, monitor)?;
-
-            let mut wallpapers = get_all_wallpapers(dir_path.clone())?;
-
-            let Wallpaper { path, monitor } = get_cur_wallpaper(Some(monitor))?;
-
-            wallpapers.sort_by_key(|a| a.path.0.clone());
-
-            let wallpaper =
-                next_wallpaper(wallpapers, ActiveWallpaper(Wallpaper { path, monitor }));
-
-            set_new_wallpaper(&wallpaper)?;
-            set_cur_wallpaper(&wallpaper)
-        }
-
-        CliCommand::Prev { dir_path, monitor } => {
-            let (dir_path, monitor) = setup_dir_path_and_monitor(dir_path, monitor)?;
-
-            let mut wallpapers = get_all_wallpapers(dir_path.clone())?;
-
-            let Wallpaper { path, monitor } = get_cur_wallpaper(Some(monitor))?;
-
-            wallpapers.sort_by_key(|a| a.path.0.clone());
-
-            let wallpaper =
-                prev_wallpaper(wallpapers, ActiveWallpaper(Wallpaper { path, monitor }));
-
-            set_new_wallpaper(&wallpaper)?;
-            set_cur_wallpaper(&wallpaper)
-        }
+        CliCommand::Next { dir_path, monitor } => choose_wallpaper_handler(
+            dir_path,
+            monitor,
+            |path: Path, monitor: Monitor, wallpapers: Vec<Wallpaper>| -> Wallpaper {
+                next_wallpaper(wallpapers, ActiveWallpaper(Wallpaper { path, monitor }))
+            },
+        ),
+        CliCommand::Prev { dir_path, monitor } => choose_wallpaper_handler(
+            dir_path,
+            monitor,
+            |path: Path, monitor: Monitor, wallpapers: Vec<Wallpaper>| -> Wallpaper {
+                prev_wallpaper(wallpapers, ActiveWallpaper(Wallpaper { path, monitor }))
+            },
+        ),
     }
+}
+
+fn choose_wallpaper_handler<F: Fn(Path, Monitor, Vec<Wallpaper>) -> Wallpaper>(
+    dir_path: Option<Path>,
+    monitor: Option<Monitor>,
+    choose_clouser: F,
+) -> Result<(), HyprpaperPickerError> {
+    let (dir_path, monitor) = setup_dir_path_and_monitor(dir_path, monitor)?;
+
+    let Wallpaper { path, monitor } = get_cur_wallpaper(Some(monitor))?;
+    let mut wallpapers = get_all_wallpapers(dir_path.clone())?;
+    wallpapers.sort_by(|a, b| a.path.0.cmp(&b.path.0));
+
+    let wallpaper = choose_clouser(path, monitor, wallpapers);
+
+    set_new_wallpaper(&wallpaper)?;
+    set_cur_wallpaper(&wallpaper)
+}
+
+fn rand_handler(
+    dir_path: Option<Path>,
+    monitor: Option<Monitor>,
+) -> Result<(), HyprpaperPickerError> {
+    let (dir_path, monitor) = setup_dir_path_and_monitor(dir_path, monitor)?;
+
+    let wallpapers = get_all_wallpapers(dir_path.clone())?;
+
+    let Wallpaper { path, monitor } = get_cur_wallpaper(Some(monitor))?;
+
+    let wallpaper = random_wallpaper(wallpapers, ActiveWallpaper(Wallpaper { path, monitor }));
+
+    set_new_wallpaper(&wallpaper)?;
+    set_cur_wallpaper(&wallpaper)
+}
+
+fn setup_handler(
+    wallpaper_path: Path,
+    monitor: Option<Monitor>,
+) -> Result<(), HyprpaperPickerError> {
+    if !is_wallpaper_path(&wallpaper_path.0) {
+        return Err(HyprpaperPickerError::Input(
+            "wallpaper file must be: png, jpg, jpeg or jxl".to_string(),
+        ));
+    }
+
+    let monitor = if let Some(monit) = monitor {
+        monit
+    } else {
+        let Wallpaper { monitor: monit, .. } = get_cur_wallpaper(monitor)?;
+        monit
+    };
+
+    let wallpaper = Wallpaper {
+        path: wallpaper_path,
+        monitor,
+    };
+
+    set_new_wallpaper(&wallpaper)?;
+    set_cur_wallpaper(&wallpaper)
 }
 
 fn setup_dir_path_and_monitor(
